@@ -12,6 +12,10 @@ fi
 # Store the first argument (directory name)
 search_dir="$1"
 
+
+echo search_dir is
+echo $search_dir
+
 # Shift the arguments to remove the first one
 shift
 
@@ -32,8 +36,18 @@ find_directory() {
 # Find the matching directory
 matched_dir=$(find_directory)
 
+echo matched_dir is
+echo $matched_dir
+
 # Check if a matching directory was found
 if [ -n "$matched_dir" ]; then
+    echo "got a matched dir and @ is,"
+    echo "$@"
+    echo "got a matched dir and match dir is"
+    echo "$matched_dir"
+    # yarn dev --config "$matched_dir/vite.config.ts" "$@"
+    # yarn dev --config "$matched_dir/vite.config.ts" "./projects/wing"
+    # yarn dev --config "$matched_dir/vite.config.ts" "./projects/wing"
     yarn dev --config "$matched_dir/vite.config.ts" "$@"
 else
     echo "Error: No matching directory found in 'exercises' or 'projects'."
