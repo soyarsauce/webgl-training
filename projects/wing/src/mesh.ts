@@ -1,0 +1,152 @@
+import { vec3 } from 'gl-matrix';
+
+export class Mesh {
+  /** A way to store data, usually vertex data, on the GPU.
+   *
+   * When GPU is rendering, you are rendering like this.
+   *
+   * Not actually uploading all the faces and vertices to every GPU, that would
+   * be super slow.
+   *
+   * Put all the data on the GPU once,
+   * - Each time you need to change camera angle/move, re-render the whole thing
+   *
+   * So, the buffer will store our vertices.
+   */
+  public buffer: WebGLBuffer;
+  public vertexData: Float32Array | null = null;
+
+  constructor(
+    private gl: WebGL2RenderingContext,
+    vertices: vec3[]
+  ) {
+    /**
+     * Webgl isn't really an OO API; Can't call methods on it,
+     *
+     * Think of it like a pointer in C/C++
+     */
+    const buffer = gl.createBuffer();
+    if (!buffer) {
+      throw new Error('Failed to create buffer');
+    }
+
+    /** create it & hold onto it. */
+    this.buffer = buffer;
+
+    /**
+     * now let's put our vertices onto it. this.buffer.setData()? -> no, webgl
+       is not OO API. it's a stateful API, if we want to do anything with the
+       buffer, first need to bind the buffer.
+     */
+
+    /** This is like setting a global variable. */
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+    // gl.ARRAY_BUFFER ==> array buffer binding point. think of it like a
+    // "global variable that you are setting"
+    /** GL_ARRAY_BUFFER The buffer will be used as a source for vertex data, but
+        the connection is only made when glVertexAttribPointer is called. The
+        pointer field of this function is taken as a byte offset from the
+        beginning of whatever buffer is currently bound to this target. */
+
+    /**
+     * buffer is similar, you are overriding the previous binding, but the
+     * buffer itself, lives on.
+     *
+     * Don't suddenly lose the buffer if we bind a different buffer,
+     *
+     * But can _only_ have one buffer bound at a time.
+     *
+     * Think of it like e.g. "Any buffer things you operate on, will happent to
+     * this buffer"
+     */
+
+    // flatten our data
+    // number of our vertices, * 3;
+    // Float32Array = single precision
+    // Float64Array = double precision
+    // gl-matrix stores things as 32 floats by default
+    const vertexData = new Float32Array(vertices.length * 3);
+    this.vertexData = vertexData;
+    for (let i = 0; i < vertices.length; i++) {
+      vertexData[i * 3] = vertices[i][0];
+      vertexData[i * 3 + 1] = vertices[i][2];
+      vertexData[i * 3 + 2] = vertices[i][1];
+    }
+
+    /**
+     * `bufferData` -> takes some data, puts it into the buffer you've bound.
+     *
+     * Pattern in webgl -> bind to a binding point, then use functions that
+     * operate on that binding point.
+     *
+     * This is basically equivalent to, if opengl was a nicely design API
+     *
+     * equivalent of `this.buffer.bufferData()`;
+     * instead of a method on a buffer, we bind it, call a global function.
+     */
+    // gl.bufferData(gl.ARRAY_BUFFER, vertexData, gl.STATIC_DRAW);
+    /**
+     * this will either be static or dynamic draw, depending on how often you
+    are going to change the data. Frequently or not, internally it will
+    make some optimisations. You're just setting this data once, so it's
+    optimised, you can change it frequently if you need to.
+     */
+
+    /**
+     * Usually you would avoid changing vertex data, because if everything
+    needs to be rendered, you need to re-upload all the data large amoutns
+    to the GPU & modify without reuploading.
+     */
+    gl.bufferData(gl.ARRAY_BUFFER, vertexData, gl.STATIC_DRAW);
+
+    /**
+     * As per last week, good to clean up, so that other parts of the code don't
+     * accidentally use the buffer.
+     */
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+    /**
+     * These bindBuffer calls aren't actually doing any work on the GPU, they're
+    just setting some state on the GPU. No performance impact of doing this.
+     */
+
+    /**
+     * Q: what's roughyl something that's static, vs dynamic?
+     * A: most of the time you want static. Let's say you have a model of a 
+     * character, and you wanted to bend the arms as an animation, even in
+     * that case you wouldn't re-upload the mesh when you need to modify the
+     * vertices.
+     * What you need instead, is modify vertices on the GPU, then use vertex
+     * shaders to modify the vertices.
+     * 
+     * Just upload the angle of the bones, and each angle is mapped to the bone,
+     * then it affects all the vertices it's connected to.
+     * 
+     * Even if you tried to modify the mesh, to avoid uploading data to the GPU.
+     * 
+     * You might want to use dynamic draw, if you're doing something like
+     * "fabric simulation". Search "video game cloth physics",
+     * 
+     * Some older games might have a cloth animation. It's pre-baked/ pre-calculated,
+     * every frame it'll reupload.
+     * 
+     * Newer engines will use GPU based techniques.
+     * 
+     * we use dynamic draw, for our instance buffers.
+
+      but that’s not setting individual vertices, it’s defining, “array of all stickies we need to re-render”
+
+      we’ll update the colour in the array, if the sticky changes.
+
+      a buffer isn’t always vertex data. 
+
+      can be other things, e.g. an InstancedBuffer
+
+      no data about vertices, properties about different meshes you’re drawing.
+      A good example of another binding point; GL_ELEMENT_ARRAY_BUFFER, where it’s not
+      vertex data, but indices.
+
+      Depends on what the buffer is used for.
+     */
+  }
+}

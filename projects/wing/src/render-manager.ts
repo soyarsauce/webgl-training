@@ -50,7 +50,7 @@ export class RenderManager {
     // this is a "dangerous pattern" if not clearcolor before calling clear
     // this.gl.clearColor(0, 0, 0, 1);
 
-    if (now - this.lastClearTime > 250) {
+    if (now - this.lastClearTime > 25000) {
       this.gl.clearColor(Math.random(), Math.random(), Math.random(), 1);
       this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
       // this.gl.clear(this.gl.COLOR_BUFFER_BIT);
