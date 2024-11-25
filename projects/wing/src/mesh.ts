@@ -148,5 +148,86 @@ export class Mesh {
 
       Depends on what the buffer is used for.
      */
+
+    /**
+       * 
+       * er:
+
+program that runs on a GPU
+
+fragment shader:
+
+running for every pixel, on the triangle we are rendering, to determine the final colour.
+
+gpu can do this really quickly, since it can do lots of things at once
+
+shaders for vertices themselves:
+
+as rotating camera, another shader is also running on the vertices.
+
+they will rotate the vertices, to get them into the final spot.
+
+- outputs the
+
+position.
+
+texture applied, to the surface.
+
+rotates them.
+
+e.g. animated model of a person.
+
+rotate angles
+
+in order to display texture, then rotate the vertices.
+got this image, different parts of the cube are mapped to different parts of the
+triangle.
+
+the vertex shader, outputs the co-ordinates, then the fragment shader, takes the
+co-ordinates and maps it to the texture.
+
+looking up which parts of the image to display, it will interpolate between the
+vertices.
+using the "UV editor" in blender, can see each face of the cube, and how it's
+mapped to the texture.
+
+can make it bigger, smaller, etc.
+so the vertex shader would be outputting 
+
+any data output by the vertex shader, it will be automatically interpolated
+between all the pixels in the triangle, if rendering this specific point of
+the triangle, then the fragment shader will be provided, any information about
+the 3 adjacent vertices, and linearly weighted between them.
+
+if rendeirng a point really close, the input position, will be, 
+
+paul: vertex shader, has all the points, and says "has all these points,
+from closest bottom elft, all the way to top right, maps its own,
+space to the texture space, then the fragment shader, takes the
+data and anything that's at the closest point to the bottom left, as it gets to
+the top right, i'm rendering to where the more yellow colours.
+
+caleb: "output value of 0, and 1, on left, right. when the fragment shader runs,
+the pixel in the middle, it will get the value 0.5, "
+
+for texture co=ordinates,
+each 3 corner, corresponds to a position on the image.
+then it's being linearly blended on the 3 points.;
+
+then can display an image evenly across the entire surface/triangle.
+being evenly distributed 
+
+are there any other shaders?
+- geometry shader, tessellation shader, compute shader.
+summary of each:
+- vertex shader: runs on each vertex, outputs the position of the vertex.
+- fragment shader: runs on each pixel, outputs the colour of the pixel.
+- geometry shader: runs on each triangle, can output more triangles.
+- tessellation shader: runs on each triangle, can output more triangles.
+- compute shader: runs on the GPU, but not on the GPU, can be used for
+  general purpose computation.
+  
+
+       */
   }
 }
