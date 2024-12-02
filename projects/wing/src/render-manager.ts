@@ -2,6 +2,8 @@ export class RenderManager {
   public gl: WebGL2RenderingContext;
   public canvas: HTMLCanvasElement;
 
+  private onRenderCallbacks: (() => void)[] = [];
+
   // private lastFrameTime = 0;
   private lastClearTime = 0;
 
@@ -30,6 +32,10 @@ export class RenderManager {
     requestAnimationFrame(this.render);
   }
 
+  public addRenderCallback(callback: () => void) {
+    this.onRenderCallbacks.push(callback);
+  }
+
   public render = () => {
     /** perf things */
     const now = performance.now();
@@ -50,15 +56,25 @@ export class RenderManager {
     // this is a "dangerous pattern" if not clearcolor before calling clear
     // this.gl.clearColor(0, 0, 0, 1);
 
-    if (now - this.lastClearTime > 25000) {
-      this.gl.clearColor(Math.random(), Math.random(), Math.random(), 1);
-      this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-      // this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-      this.lastClearTime = now;
-    }
+    // if (now - this.lastClearTime > 25000) {
+    //   this.gl.clearColor(Math.random(), Math.random(), Math.random(), 1);
+    //   this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+    //   // this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+    //   this.lastClearTime = now;
+    // }
 
     // can clear color right after, to "not let state leak"
     this.gl.clearColor(0, 0, 0, 0);
+
+    this.gl.clearColor(0, 0, 0, 1);
+
+    // Clear the screen
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+
+    // Call all the render callbacks
+    for (const callback of this.onRenderCallbacks) {
+      callback();
+    }
 
     // console.log('Rendering');
     requestAnimationFrame(this.render);

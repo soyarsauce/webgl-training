@@ -1,4 +1,5 @@
 import { vec3 } from 'gl-matrix';
+import { Program } from './program';
 
 export class Mesh {
   /** A way to store data, usually vertex data, on the GPU.
@@ -18,7 +19,7 @@ export class Mesh {
 
   constructor(
     private gl: WebGL2RenderingContext,
-    vertices: vec3[]
+    private vertices: vec3[]
   ) {
     /**
      * Webgl isn't really an OO API; Can't call methods on it,
@@ -229,5 +230,43 @@ summary of each:
   
 
        */
+  }
+
+  render(program: Program, positionVariableName: string) {
+    program.use();
+
+    // const positionAttributeLocation = program.getAttribLocation('aPosition');
+    const positionAttributeLocation =
+      program.getAttribLocation(positionVariableName);
+
+    this.gl.enableVertexAttribArray(positionAttributeLocation);
+
+    /** bind buffer, then tell the attribute how to get data out of it. */
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
+
+    /** tell the attribute how to get data out of the buffer. */
+    this.gl.vertexAttribPointer(
+      // attribute location
+      positionAttributeLocation,
+      // number of components per vertex, 3 for x, y, z
+      3,
+      // gpu hardware optimised for 32 bit floats.
+      this.gl.FLOAT,
+      // false for no normalisation
+      false,
+      // number of components per vertex, 3 for x, y, z
+      // 3,
+      3 * Float32Array.BYTES_PER_ELEMENT,
+      0
+    );
+
+    // SOLN
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
+    this.gl.drawArrays(this.gl.TRIANGLES, 0, this.vertices.length);
+
+    // // Clean up any state that we set. This is good practice as it avoids us acc
+    // // accidentally using the wrong state later.
+    this.gl.disableVertexAttribArray(positionAttributeLocation);
+    // this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
   }
 }
