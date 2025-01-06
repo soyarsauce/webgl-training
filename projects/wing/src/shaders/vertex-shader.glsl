@@ -5,6 +5,7 @@
 // uniform mat4 uProjectionMatrix;
 // uniform mat4 uViewMatrix;
 // uniform mat4 uModelMatrix;
+uniform mat4 uViewProjectionMatrix;
 
 // void main() {
 //   gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aPosition, 1.0);
@@ -16,5 +17,6 @@ in vec3 aPosition;
 void main() {
   // Output the vertex position unchanged
   // gl_Position is a built-in variable that holds the final output position
-  gl_Position = vec4(aPosition, 1.0);
+  // gl_Position = vec4(aPosition, 1.0);
+  gl_Position = uViewProjectionMatrix * vec4(aPosition, 1.0);
 }
