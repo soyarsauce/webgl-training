@@ -1,5 +1,16 @@
-import { vec3 } from 'gl-matrix';
+import { vec2, vec3 } from 'gl-matrix';
 import { Program } from './program';
+
+interface Vertex {
+  // pos for each vertex
+  position: vec3;
+  // texture co-ordinate for each vertex
+  uv: vec2;
+}
+
+const elementsPerPosition = 3;
+const elementsPerUV = 2;
+const elementsPerVertex = elementsPerPosition + elementsPerUV;
 
 export class Mesh {
   /** A way to store data, usually vertex data, on the GPU.
@@ -19,7 +30,8 @@ export class Mesh {
 
   constructor(
     private gl: WebGL2RenderingContext,
-    private vertices: vec3[]
+    // private vertices: vec3[]
+    private vertices: Vertex[]
   ) {
     /**
      * Webgl isn't really an OO API; Can't call methods on it,
@@ -66,7 +78,8 @@ export class Mesh {
     // Float32Array = single precision
     // Float64Array = double precision
     // gl-matrix stores things as 32 floats by default
-    const vertexData = new Float32Array(vertices.length * 3);
+
+    const vertexData = new Float32Array(vertices.length * elementsPerVertex);
     this.vertexData = vertexData;
     for (let i = 0; i < vertices.length; i++) {
       // vertexData[i * 3] = vertices[i][0];
@@ -76,9 +89,22 @@ export class Mesh {
       // vertexData[i * 3] = vertices[i][0];
       // vertexData[i * 3 + 1] = vertices[i][2];
       // vertexData[i * 3 + 2] = vertices[i][1];
-      vertexData[i * 3] = vertices[i][0];
-      vertexData[i * 3 + 1] = vertices[i][1];
-      vertexData[i * 3 + 2] = vertices[i][2];
+
+      /** */
+      // vertexData[i * 3] = vertices[i][0]; // x
+      // vertexData[i * 3 + 1] = vertices[i][1]; // y
+      // vertexData[i * 3 + 2] = vertices[i][2]; // z
+      // 2025-02-03 - > adding u, v, 5 things per vertex
+      // modify the vertex data, to include the uv data.
+      // vertexData[i * 5 + 3] = vertices[i].uv[0];
+      // each vertex has 3 components (x, y, z)
+      vertexData[i * elementsPerVertex] = vertices[i].position[0]; // x
+      vertexData[i * elementsPerVertex + 1] = vertices[i].position[1]; // y
+      vertexData[i * elementsPerVertex + 2] = vertices[i].position[2]; // z
+
+      // each vertex has 2 components (u, v)
+      vertexData[i * elementsPerVertex + 3] = vertices[i].uv[0]; // u
+      vertexData[i * elementsPerVertex + 4] = vertices[i].uv[1]; // v
     }
 
     /**
@@ -239,32 +265,54 @@ summary of each:
        */
   }
 
-  render(program: Program, positionVariableName: string) {
+  render(
+    program: Program,
+    positionVariableName: string,
+    uvVariableName: string
+  ) {
     program.use();
 
     // const positionAttributeLocation = program.getAttribLocation('aPosition');
     const positionAttributeLocation =
       program.getAttribLocation(positionVariableName);
+    const uvAttributeLocation = program.getAttribLocation(uvVariableName);
 
     this.gl.enableVertexAttribArray(positionAttributeLocation);
+    this.gl.enableVertexAttribArray(uvAttributeLocation);
 
     /** bind buffer, then tell the attribute how to get data out of it. */
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
 
     /** tell the attribute how to get data out of the buffer. */
+    // this.gl.vertexAttribPointer(
+    //   // attribute location
+    //   positionAttributeLocation,
+    //   // number of components per vertex, 3 for x, y, z
+    //   3,
+    //   // gpu hardware optimised for 32 bit floats.
+    //   this.gl.FLOAT,
+    //   // false for no normalisation
+    //   false,
+    //   // The stride:
+    //   // 3,
+    //   // 3 * Float32Array.BYTES_PER_ELEMENT,
+    //   elementsPerVertex * Float32Array.BYTES_PER_ELEMENT,
+    //   0
+    // );
     this.gl.vertexAttribPointer(
       // attribute location
-      positionAttributeLocation,
+      uvAttributeLocation,
       // number of components per vertex, 3 for x, y, z
-      3,
+      elementsPerUV,
       // gpu hardware optimised for 32 bit floats.
       this.gl.FLOAT,
       // false for no normalisation
       false,
-      // number of components per vertex, 3 for x, y, z
+      // The stride:
       // 3,
-      3 * Float32Array.BYTES_PER_ELEMENT,
-      0
+      // 3 * Float32Array.BYTES_PER_ELEMENT,
+      elementsPerVertex * Float32Array.BYTES_PER_ELEMENT,
+      elementsPerPosition * Float32Array.BYTES_PER_ELEMENT
     );
 
     // SOLN
