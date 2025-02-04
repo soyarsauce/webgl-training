@@ -1,6 +1,14 @@
 #version 300 es
 
 precision highp float;
+// pi math
+#define PI 3.14159265359
+
+// Input variables that define the two colours of the gradient
+uniform vec3 uColour1;
+uniform vec3 uColour2;
+uniform float uTime;
+in vec3 vPosition;
 
 // uniform vec3 screenSize;
 // uniform vec2 cameraPosition;
@@ -16,13 +24,19 @@ precision highp float;
 // and use linear algebra to do the math for us;
 
 // An input variable that defines what colour we want to render the triangle with
-uniform vec3 uColour;
-
+// uniform vec3 uColour;
 out vec4 fragColour;
 
+
+
 void main() {
+  float gradient = vPosition.x + 0.5;
+  gradient += uTime;
+  gradient = 0.5 + 0.5 * cos(2.0 * PI * gradient);
+  vec3 colour = mix(uColour1, uColour2, gradient);
+
   // fragColor = vec4(1.0, 1.0, 1.0, 1.0); // White
   // fragColor = vec4(1.0, 0.0, 0.5, 1.0); // White
   // fragColor = vec4(1.0, 0.0, 0.5, 1.0); // White
-  fragColour = vec4(uColour, 1.0);
+  fragColour = vec4(colour, 1.0);
 }

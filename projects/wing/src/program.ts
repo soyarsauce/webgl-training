@@ -96,6 +96,26 @@ export class Program {
   }
 
   /**
+   * VIA REFERENCE: Sets a `float` uniform variable in the program.
+   *
+   * @param location The location of the uniform variable in the program, as
+   * returned by {@link getUniformLocation}.
+   * @param value The value to set the uniform to.
+   */
+  setUniform1f(location: WebGLUniformLocation | null, value: number): void {
+    if (location == null) {
+      throw new Error('Uniform location is null');
+    }
+
+    this.use();
+
+    this.gl.uniform1f(location, value);
+
+    // Unbind the program to avoid accidental changes
+    this.gl.useProgram(null);
+  }
+
+  /**
    * VIA REFERENCE: Sets a `vec3` uniform variable in the program.
    *
    * @param location The location of the uniform variable in the program, as

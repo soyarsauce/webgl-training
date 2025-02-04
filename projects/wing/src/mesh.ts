@@ -69,6 +69,13 @@ export class Mesh {
     const vertexData = new Float32Array(vertices.length * 3);
     this.vertexData = vertexData;
     for (let i = 0; i < vertices.length; i++) {
+      // vertexData[i * 3] = vertices[i][0];
+      // vertexData[i * 3 + 2] = vertices[i][2];
+      // vertexData[i * 3 + 1] = vertices[i][1];
+
+      // vertexData[i * 3] = vertices[i][0];
+      // vertexData[i * 3 + 1] = vertices[i][2];
+      // vertexData[i * 3 + 2] = vertices[i][1];
       vertexData[i * 3] = vertices[i][0];
       vertexData[i * 3 + 1] = vertices[i][1];
       vertexData[i * 3 + 2] = vertices[i][2];

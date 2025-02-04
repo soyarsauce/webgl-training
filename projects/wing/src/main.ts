@@ -72,27 +72,40 @@ function main() {
     // START REFERENCE
     // Move the camera in a circle
     camera.zoom = 0.5;
-    camera.position[0] = Math.sin(performance.now() * 0.001);
+    camera.position[0] = Math.sin(performance.now() * 0.002);
     camera.position[1] = Math.cos(performance.now() * 0.001);
     // END REFERENCE
 
     // or sine wave to
     // camera.position[9] = Math.sin(performance.now() * 0.001);
 
+    const colour1Uniform = program.getUniformLocation('uColour1');
+    const colour2Uniform = program.getUniformLocation('uColour2');
+    const timeUniform = program.getUniformLocation('uTime');
+
+    program.setUniform3f(colour1Uniform, vec3.fromValues(0.8, 0.6, 0.8));
+    program.setUniform3f(colour2Uniform, vec3.fromValues(0.7, 0.2, 0.7));
+
+    // Set the time uniform
+    program.setUniform1f(
+      timeUniform,
+      performance.now() / 1000 // Convert to seconds
+    );
+
     const pulse = (Math.sin(performance.now() / 1000) + 1) / 2;
     const pulse2 = (Math.sin(performance.now() / 1000) + 1) / 2;
     const pulse3 = (Math.cos(performance.now() / 1000) + 1) / 2;
     // // Set the colour of the triangle
-    const colourUniformLocation = program.getUniformLocation('uColour');
-    // renderManger.gl.uniform3f(colourUniformLocation, pulse, 0, 0);
-    program.setUniform3f(
-      colourUniformLocation,
-      // // Red, pulsating
-      // vec3.fromValues(pulse, 0, 0)
-      // Red, pulsating
-      // vec3.fromValues(0, pulse2, pulse3)
-      vec3.fromValues(pulse, pulse2, pulse3)
-    );
+    // const colourUniformLocation = program.getUniformLocation('uColour');
+    // // renderManger.gl.uniform3f(colourUniformLocation, pulse, 0, 0);
+    // program.setUniform3f(
+    //   colourUniformLocation,
+    //   // // Red, pulsating
+    //   // vec3.fromValues(pulse, 0, 0)
+    //   // Red, pulsating
+    //   // vec3.fromValues(0, pulse2, pulse3)
+    //   vec3.fromValues(pulse, pulse2, pulse3)
+    // );
 
     // program.setUniformMatrix4f(
     //   viewProjectionMatrix,
