@@ -101,6 +101,9 @@ export class Mesh {
       vertexData[i * elementsPerVertex] = vertices[i].position[0]; // x
       vertexData[i * elementsPerVertex + 1] = vertices[i].position[1]; // y
       vertexData[i * elementsPerVertex + 2] = vertices[i].position[2]; // z
+      // vertexData[i * elementsPerVertex] = vertices[i].position[0]; // x
+      // vertexData[i * elementsPerVertex + 1] = vertices[i].position[1]; // y
+      // vertexData[i * elementsPerVertex + 2] = vertices[i].position[2]; // z
 
       // each vertex has 2 components (u, v)
       vertexData[i * elementsPerVertex + 3] = vertices[i].uv[0]; // u
@@ -301,6 +304,23 @@ summary of each:
     // );
     this.gl.vertexAttribPointer(
       // attribute location
+      positionAttributeLocation,
+      // number of components per vertex, 3 for x, y, z
+      elementsPerPosition,
+      // gpu hardware optimised for 32 bit floats.
+      this.gl.FLOAT,
+      // false for no normalisation
+      false,
+      // The stride:
+      // 3,
+      // 3 * Float32Array.BYTES_PER_ELEMENT,
+      elementsPerVertex * Float32Array.BYTES_PER_ELEMENT,
+      // offset
+      0
+    );
+
+    this.gl.vertexAttribPointer(
+      // attribute location
       uvAttributeLocation,
       // number of components per vertex, 3 for x, y, z
       elementsPerUV,
@@ -312,6 +332,7 @@ summary of each:
       // 3,
       // 3 * Float32Array.BYTES_PER_ELEMENT,
       elementsPerVertex * Float32Array.BYTES_PER_ELEMENT,
+      // offset
       elementsPerPosition * Float32Array.BYTES_PER_ELEMENT
     );
 

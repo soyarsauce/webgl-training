@@ -2,16 +2,16 @@
 
 precision highp float;
 // pi math
-#define PI 3.14159265359
+// #define PI 3.14159265359
 
 // Input variables that define the two colours of the gradient
-uniform vec3 uColour1;
-uniform vec3 uColour2;
-uniform float uTime;
-in vec3 vPosition;
+// uniform vec3 uColour1;
+// uniform vec3 uColour2;
+// uniform float uTime;
+// in vec3 vPosition;
 
 uniform sampler2D uTexture;
-in vec2 uVu;
+in vec2 vUv;
 
 // uniform vec3 screenSize;
 // uniform vec2 cameraPosition;
@@ -33,9 +33,11 @@ out vec4 fragColour;
 
 
 void main() {
-  vec4 color = texture(uTexture, uVu);
   // fragColour = vec4(color.rgb, 1.0);
-  fragColour = color;
+  // vec4 color = texture(uTexture, vUv);
+  // fragColour = color;
+  vec3 colour = texture(uTexture, vUv.xy).rgb;
+  fragColour = vec4(colour, 1.0);
 
   // fragColor = vec4(1.0, 1.0, 1.0, 1.0); // White
   // fragColor = vec4(1.0, 0.0, 0.5, 1.0); // White

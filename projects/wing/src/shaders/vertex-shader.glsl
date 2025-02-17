@@ -15,12 +15,13 @@ uniform mat4 uViewProjectionMatrix;
 in vec3 aPosition;
 in vec2 aUv;
 
-out vec3 vPosition;
+out vec2 vUv;
+// out vec3 vPosition;
 
 void main() {
   // pass vertex position to the fragment shader
-  vPosition = aPosition;
-  uVu = aUv;
+  // vPosition = aPosition;
+  vUv = aUv;
 
   // Output the vertex position unchanged
   // gl_Position is a built-in variable that holds the final output position
