@@ -1,6 +1,24 @@
-import { vec3 } from 'gl-matrix';
+import { vec2, vec3 } from 'gl-matrix';
 
 import { Program } from './program';
+
+/**
+ * Represents a single vertex in a 3D mesh.
+ */
+interface Vertex {
+  /**
+   * The position of the vertex in 3D space.
+   */
+  position: vec3;
+  /**
+   * The texture coordinate of the vertex. This defines what point in the
+   * texture should be mapped to this vertex.
+   */
+  uv: vec2;
+}
+
+// We need 3 components for position, plus 2 for UV
+const COMPONENTS_PER_VERTEX = 3 + 2;
 
 /**
  * Represents a 3D mesh in WebGL. A mesh is a collection of vertices that define
@@ -26,7 +44,7 @@ export class Mesh {
    */
   constructor(
     private gl: WebGL2RenderingContext,
-    private vertices: vec3[]
+    private vertices: Vertex[]
   ) {
     // Create a new buffer object
     const buffer = this.gl.createBuffer();
@@ -46,15 +64,19 @@ export class Mesh {
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
 
     // Convert the vertices array into a flat Float32Array. WebGL expects our
-    // data in a flat format, meaning that instead of an array of vec3 objects,
-    // we create a single array where the x, y, z components of each vertex are
-    // laid out sequentially.
-    const vertexData = new Float32Array(vertices.length * 3);
+    // data in a flat format, meaning that instead of an array of vector
+    // objects, we create a single array where the individual components of each
+    // vertex are laid out sequentially.
+    const vertexData = new Float32Array(vertices.length * COMPONENTS_PER_VERTEX);
     for (let i = 0; i < vertices.length; i++) {
-      // Each vertex has 3 components (x, y, z)
-      vertexData[i * 3] = vertices[i][0]; // x
-      vertexData[i * 3 + 1] = vertices[i][1]; // y
-      vertexData[i * 3 + 2] = vertices[i][2]; // z
+      // Each vertex has 3 position components (x, y, z)
+      vertexData[i * COMPONENTS_PER_VERTEX] = vertices[i].position[0]; // x
+      vertexData[i * COMPONENTS_PER_VERTEX + 1] = vertices[i].position[1]; // y
+      vertexData[i * COMPONENTS_PER_VERTEX + 2] = vertices[i].position[2]; // z
+
+      // Plus 2 UV components (u, v)
+      vertexData[i * COMPONENTS_PER_VERTEX + 3] = vertices[i].uv[0]; // u
+      vertexData[i * COMPONENTS_PER_VERTEX + 4] = vertices[i].uv[1]; // v
     }
 
     // Store the vertex data in the buffer
@@ -87,30 +109,39 @@ export class Mesh {
    * vertex shader. This should match the name used in the shader code. For
    * example, if your vertex shader declares `in vec3 aPosition;`, then you
    * would pass `aPosition` here.
+   * @param uvAttributeName The name of the UV attribute in the vertex shader.
+   * This should match the name used in the shader code. For example, if your
+   * vertex shader declares `in vec2 aUv;`, then you would pass `aUv` here.
    */
-  render(program: Program, positionAttributeName: string): void {
+  render(
+    program: Program,
+    positionAttributeName: string,
+    uvAttributeName: string
+  ): void {
     // Use the specified program
     program.use();
 
-    // Get the location of the 'position' attribute in the program. This
-    // basically allows us to do things with the 'position' attribute without
-    // needing to refer to it by its name every time.
+    // Get the location of the attributes in the program. This basically allows
+    // us to do things with the attributes without needing to refer to it by its
+    // name every time.
     const positionAttributeLocation = program.getAttribLocation(
       positionAttributeName
     );
+    const uvAttributeLocation = program.getAttribLocation(uvAttributeName);
 
     // By calling `enableVertexAttribArray`, we're telling WebGL that we want to
-    // supply data to the 'position' attribute from a buffer. If we didn't call
-    // this, then the attribute would have no data to read.
+    // supply data to the attributes from a buffer. If we didn't call this, then
+    // each attribute would have no data to read.
     this.gl.enableVertexAttribArray(positionAttributeLocation);
+    this.gl.enableVertexAttribArray(uvAttributeLocation);
 
-    // Bind our buffer containing vertex positions, so that we can read from it
+    // Bind our buffer containing vertex data, so that we can read from it
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
 
-    // Tell WebGL *how* to read the position data from our buffer and supply
-    // it to the 'position' attribute in the vertex shader
+    // Tell WebGL *how* to read the data from our buffer and supply it to each
+    // attribute in the vertex shader
     this.gl.vertexAttribPointer(
-      // Which attribute we want to supply data to
+      // We're defining the position attribute
       positionAttributeLocation,
       // How many components there are per vertex attribute. We have 3 because
       // each position is a vec3 (x, y, z)
@@ -122,13 +153,26 @@ export class Mesh {
       // This flag is not relevant for floating point numbers.
       false,
       // The stride: how many bytes to move forward to get from one vertex to
-      // the next. We calculate this as 3 (components) * 4 (bytes per float) =
-      // 12 bytes. This tells WebGL that each vertex's data is 12 bytes apart in
+      // the next. We calculate this as 5 (components) * 4 (bytes per float) =
+      // 20 bytes. This tells WebGL that each vertex's data is 20 bytes apart in
       // the buffer.
-      3 * Float32Array.BYTES_PER_ELEMENT,
+      COMPONENTS_PER_VERTEX * Float32Array.BYTES_PER_ELEMENT,
       // The offset: how many bytes inside the buffer to start from. 0 means
       // start at the beginning of the buffer.
       0
+    );
+    this.gl.vertexAttribPointer(
+      // We're defining the UV attribute
+      uvAttributeLocation,
+      // Each texture coordinate is a vec2 (u, v)
+      2,
+      this.gl.FLOAT,
+      false,
+      // Stride
+      COMPONENTS_PER_VERTEX * Float32Array.BYTES_PER_ELEMENT,
+      // Offset. Unlike the position attribute, the UV attribute starts after
+      // the first 3 components (12 bytes).
+      3 * Float32Array.BYTES_PER_ELEMENT
     );
 
     // Draw the mesh. TRIANGLES tells WebGL to interpret every three vertices as
@@ -138,6 +182,7 @@ export class Mesh {
     // Clean up any state that we set. This is good practice as it avoids us
     // accidentally using the wrong state later.
     this.gl.disableVertexAttribArray(positionAttributeLocation);
+    this.gl.disableVertexAttribArray(uvAttributeLocation);
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
     this.gl.useProgram(null);
   }

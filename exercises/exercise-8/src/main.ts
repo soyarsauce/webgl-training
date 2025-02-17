@@ -1,4 +1,4 @@
-// Exercise 6: Implementing basic shader effects
+// Exercise 8: More textures
 
 import { Camera } from './camera';
 import { RenderManager } from './render-manager';
@@ -20,9 +20,9 @@ function main() {
   // Every frame, render the triangle using the program
   canvas.onRender(() => {
     // Move the camera in a circle
-    camera.zoom = 0.5;
-    camera.position[0] = Math.sin(performance.now() * 0.001);
-    camera.position[1] = Math.cos(performance.now() * 0.001);
+    camera.zoom = 1;
+    camera.position[0] = Math.sin(performance.now() * 0.0002);
+    camera.position[1] = Math.cos(performance.now() * 0.0002);
 
     // Render the triangle
     triangle.render();
