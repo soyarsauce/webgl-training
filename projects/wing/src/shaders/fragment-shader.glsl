@@ -7,10 +7,11 @@ precision highp float;
 // Input variables that define the two colours of the gradient
 // uniform vec3 uColour1;
 // uniform vec3 uColour2;
-// uniform float uTime;
+uniform float uTime;
 // in vec3 vPosition;
 
 uniform sampler2D uTexture;
+uniform sampler2D uCloudTexture;
 in vec2 vUv;
 
 // uniform vec3 screenSize;
@@ -37,7 +38,18 @@ void main() {
   // vec4 color = texture(uTexture, vUv);
   // fragColour = color;
   vec3 colour = texture(uTexture, vUv.xy).rgb;
-  fragColour = vec4(colour, 1.0);
+
+  vec2 cloudTextCoordOffset = vec2(uTime * 0.025);
+  float cloudTextCoordScale = 0.5;
+  float noise = texture(
+    uCloudTexture,
+    vUv.xy * cloudTextCoordScale + cloudTextCoordOffset
+  ).r;
+
+  noise = pow(noise + 0.46, 8.0);
+  fragColour = vec4(colour * noise, 1.0);
+
+  // fragColour = vec4(colour, 1.0);
 
   // fragColor = vec4(1.0, 1.0, 1.0, 1.0); // White
   // fragColor = vec4(1.0, 0.0, 0.5, 1.0); // White
