@@ -68,20 +68,46 @@ export class TriangleObject {
     //
     // Each vertex is represented by three numbers: (x, y, z)
     // In this 2D example, z is always 0.
-    this.mesh = new Mesh(this.gl, [
-      // Top of the triangle
-      { position: vec3.fromValues(0, 0.5, 0), uv: vec2.fromValues(0.5, 1.0) },
-      // Bottom left of the triangle
-      {
-        position: vec3.fromValues(-0.5, -0.5, 0),
-        uv: vec2.fromValues(0.0, 0.0),
-      },
-      // Bottom right of the triangle
-      {
-        position: vec3.fromValues(0.5, -0.5, 0),
-        uv: vec2.fromValues(1.0, 0.0),
-      },
-    ]);
+    this.mesh = new Mesh(
+      this.gl,
+      [
+        // Top of the triangle
+        { position: vec3.fromValues(0, 0.5, 0), uv: vec2.fromValues(0.5, 1.0) },
+        // Bottom left of the triangle
+        {
+          position: vec3.fromValues(-0.5, -0.5, 0),
+          uv: vec2.fromValues(0.0, 0.0),
+        },
+        // Bottom right of the triangle
+        {
+          position: vec3.fromValues(0.5, -0.5, 0),
+          uv: vec2.fromValues(1.0, 0.0),
+        },
+      ],
+      [
+        {
+          name: 'iOffset',
+          size: 2, // 2d vector, using 2d coordinates;
+          // e.g. vec2.fromValues(0, Math.sin(perfomrance.now())) as Float32Array
+        },
+      ]
+    );
+    this.mesh.setInstanceCount(3);
+    this.mesh.setInstanceProperty(
+      0,
+      'iOffset',
+      vec2.fromValues(0, 0) as Float32Array
+    );
+    this.mesh.setInstanceProperty(
+      1,
+      'iOffset',
+      vec2.fromValues(1, 0) as Float32Array
+    );
+    this.mesh.setInstanceProperty(
+      2,
+      'iOffset',
+      vec2.fromValues(0.5, 1) as Float32Array
+    );
 
     // Create a program that we'll use to render the triangle
     this.program = new Program(gl, vertexShaderSource, fragmentShaderSource);

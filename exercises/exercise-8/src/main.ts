@@ -20,9 +20,9 @@ function main() {
   // Every frame, render the triangle using the program
   canvas.onRender(() => {
     // Move the camera in a circle
-    camera.zoom = 1;
-    camera.position[0] = Math.sin(performance.now() * 0.0002);
-    camera.position[1] = Math.cos(performance.now() * 0.0002);
+    camera.zoom = 0.33;
+    camera.position[0] = Math.sin(performance.now() * 0.0005);
+    camera.position[1] = Math.cos(performance.now() * 0.0005);
 
     // Render the triangle
     triangle.render();
