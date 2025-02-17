@@ -39,14 +39,16 @@ void main() {
   // fragColour = color;
   vec3 colour = texture(uTexture, vUv.xy).rgb;
 
+  // vec2 cloudTextCoordOffset = vec2(uTime * 0.025);
   vec2 cloudTextCoordOffset = vec2(uTime * 0.025);
-  float cloudTextCoordScale = 0.5;
+  float cloudTextCoordScale = 0.9;
   float noise = texture(
     uCloudTexture,
     vUv.xy * cloudTextCoordScale + cloudTextCoordOffset
   ).r;
 
-  noise = pow(noise + 0.46, 8.0);
+  // > Make the noise more intense by adding to it and raising it to a power
+  noise = pow(noise + 0.46, 4.0);
   fragColour = vec4(colour * noise, 1.0);
 
   // fragColour = vec4(colour, 1.0);

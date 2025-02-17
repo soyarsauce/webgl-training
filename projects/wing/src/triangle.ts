@@ -141,10 +141,12 @@ export class TriangleObject {
       {
         // When we sample outside the texture's bounds in the horizontal (U)
         // direction, wrap the texture around (repeat it)
-        wrapU: gl.REPEAT,
+        wrapU: gl.MIRRORED_REPEAT,
         // When we sample outside the texture's bounds in the vertical (V)
         // direction, wrap the texture around (repeat it)
         wrapV: gl.REPEAT,
+        minFilter: gl.NEAREST,
+        magFilter: gl.NEAREST,
       }
     ).then((texture) => {
       this.cloudTexture = texture;
